@@ -1,6 +1,7 @@
 <template>
   <div class="form-container">
     <h1 class="form-title">{{ formTitle }}</h1>
+    <Toast :type="flash.type" :message="flash.message" :time="new Date()" />
     <div v-if="$page.props.flash && $page.props.flash.success" class="alert alert-success">
       {{ $page.props.flash.success }}
     </div>
