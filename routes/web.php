@@ -14,4 +14,4 @@ Route::put('/books/{book}', [BookController::class, 'update'])->name('books.upda
 Route::delete('/books/{book}', [BookController::class, 'destroy'])->name('books.destroy');
 
 
-require __DIR__.'/auth.php';
+
