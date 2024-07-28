@@ -20,8 +20,7 @@
           <td>
             <Link :href="route('books.edit', book.id)" class="button edit">Edit</Link>
             <form :action="route('books.destroy', book.id)" method="POST" @submit.prevent="deleteBook(book.id)" class="delete-form">
-              @csrf
-              @method('DELETE')
+            
               <button type="submit" class="button delete">Delete</button>
             </form>
           </td>
@@ -93,6 +92,7 @@ export default {
   background: linear-gradient(to right, #ff7e5f, #feb47b);
   min-height: 100vh;
   font-family: 'Arial', sans-serif;
+  min-width: 100vw;
 }
 
 /* Title Styling */

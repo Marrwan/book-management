@@ -28,7 +28,7 @@ class BookController extends Controller
        $validator = Validator::make($request->all(), [
         'title' => 'required|string|max:255',
         'author' => 'required|string|max:255',
-        'published_year' => 'required|integer|between:1900,2099',
+        'published_year' => 'required|integer|min:1900|max:2099',
         'genre' => 'required|string|max:255',
     ]);
 
@@ -38,11 +38,18 @@ class BookController extends Controller
         //         'errors' => $validator->errors(),
         //         'book' => $request->all(),
         //     ]);
-        return redirect()->route('books.create')->with('flash', [
-            'message' => 'Book updated successfully!',
-            'error' => $validator->errors(),
-            'type' => 'error'
-        ]);
+        // return redirect()->route('books.create')->with('flash', [
+        //     'message' => 'Book updated successfully!',
+        //     'error' => $validator->errors(),
+        //     'type' => 'error'
+        // ]);
+        Log::error("ERRR");
+        Log::error($validator->errors());
+        return redirect()->back()
+        ->withErrors($validator)
+        ->withInput()
+        ->with('flash', ["errors" => $validator->errors()]);
+
     }
 
         Book::create($request->all());

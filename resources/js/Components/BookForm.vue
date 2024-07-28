@@ -1,9 +1,10 @@
 <template>
   <div class="form-container">
     <h1 class="form-title">{{ formTitle }}</h1>
-    <Toast :type="flash.type" :message="flash.message" :time="new Date()" />
-    <div v-if="$page.props.flash && $page.props.flash.success" class="alert alert-success">
-      {{ $page.props.flash.success }}
+    <div v-if="$page.props.errors && Object.keys($page.props.errors).length" class="alert alert-danger">
+      <ul>
+        <li v-for="(error, key) in $page.props.errors" :key="key">{{ error }}</li>
+      </ul>
     </div>
     <form @submit.prevent="submitForm" class="book-form">
       <div class="form-group">
@@ -18,99 +19,67 @@
       </div>
       <div class="form-group">
         <label for="published_year" class="form-label">Published Year</label>
-        <input
-          type="number"
-          v-model="form.published_year"
-          id="published_year"
-          class="form-input"
-          min="1900"
-          max="2099"
-          step="1"
-        />
+        <input type="number" v-model="form.published_year" id="published_year" class="form-input" min="1900" max="2099" step="1" />
         <span v-if="form.errors.published_year" class="error-message">{{ form.errors.published_year }}</span>
       </div>
       <div class="form-group">
         <label for="genre" class="form-label">Genre</label>
-        <input type="text" v-model="form.genre" id="genre" class="form-input" required />
+        <input type="text" v-model="form.genre" id="genre" class="form-input" />
         <span v-if="form.errors.genre" class="error-message">{{ form.errors.genre }}</span>
       </div>
       <button type="submit" class="submit-button">Submit</button>
     </form>
   </div>
-</template> 
+</template>
 
 <script>
 import { useForm } from '@inertiajs/inertia-vue3';
+import { watch } from 'vue';
 import { useToast } from 'vue-toastification';
-import { ref, watch, onMounted } from 'vue';
-import { Inertia } from '@inertiajs/inertia';
+import { usePage } from '@inertiajs/inertia-vue3';
+
 
 export default {
-  props: {
-    flash: Object,
-    book: Object,
-    errors: Object,
-  },
-  setup(props) {
-    const form = useForm({
-      title: props.book ? props.book.title : '',
-      author: props.book ? props.book.author : '',
-      published_year: props.book ? props.book.published_year : '',
-      genre: props.book ? props.book.genre : '',
-    });
+  setup() {
+    const { props } = usePage();
 
     const toast = useToast();
 
-    const submitForm = () => {
-      const routeName = props.book ? 'books.update' : 'books.store';
-      const method = props.book ? 'put' : 'post';
-      const routeParams = props.book ? { id: props.book.id } : {};
+    const form = useForm({
+      title: '',
+      author: '',
+      published_year: '',
+      genre: '',
+    });
+    toast.error(props.error);
+    // Watch for changes in props.errors and set form errors accordingly
+    watch(() => props.errors, (newErrors) => {
+      toast.error(newErrors);
+      if (newErrors) {
+        console.log("Errors on mount:", newErrors);
+        form.setErrors(newErrors);
+        Object.values(newErrors).forEach(error => {
+          toast.error(error);
+        });
+      }
+    }, { immediate: true });
 
-      form[method](route(routeName, routeParams), {
-        onSuccess: () => {
-          const message = props.book ? 'Book updated successfully!' : 'Book added successfully!';
-          toast.success(message);
-          // Optionally redirect or perform other actions
-          Inertia.visit(route('books.index'));
-        },
-        onError: (errors) => {
-          console.log({props});
-          console.log({ errors });
-          form.errors = errors;
-          toast.error('Failed to save the book.');
+    const submitForm = () => {
+      form.post(route('books.store'), {
+        onError: (error) => {
+          console.log("Errors on submit:", error);
+          form.setErrors(error);
+          Object.values(error).forEach(err => {
+            toast.error(err);
+          });
         }
       });
     };
-    const handleFlash = (flash) => {
-      if (flash && flash.message) {
-        console.log("FLASG", flash);
-        if (flash.type === 'success') {
-          toast.success(flash.message);
-        } else if (flash.type === 'error') {
-          toast.error(flash.message);
-        } else {
-          toast.info("Welcome");
-        }
-      }
-    };
-
-    onMounted(() => {
-      handleFlash(props.flash);
-    });
-
-    watch(
-      () => props.flash,
-      (newFlash) => {
-        handleFlash(newFlash);
-      },
-      { immediate: true }
-    );
 
     return {
       form,
       submitForm,
-      formTitle: props.book ? 'Edit Book' : 'Add New Book',
-      errors: props.errors || {},
+      formTitle: 'Add New Book',
     };
   },
 };
