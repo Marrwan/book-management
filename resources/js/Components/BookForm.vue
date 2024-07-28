@@ -34,29 +34,38 @@
 
 <script>
 import { useForm } from '@inertiajs/inertia-vue3';
-import { watch } from 'vue';
+import { watch, onMounted } from 'vue';
 import { useToast } from 'vue-toastification';
 import { usePage } from '@inertiajs/inertia-vue3';
 
-
 export default {
-  setup() {
-    const { props } = usePage();
-
+    props:{
+    book: Object,
+    errors: Object
+   },
+   setup(props) {
+ 
     const toast = useToast();
-
+    
     const form = useForm({
       title: '',
       author: '',
       published_year: '',
       genre: '',
     });
-    toast.error(props.error);
-    // Watch for changes in props.errors and set form errors accordingly
+    
+    onMounted(() => {
+      console.log({props});
+      if (props.book) {
+        form.title = props.book.title || '';
+        form.author = props.book.author || '';
+        form.published_year = props.book.published_year || '';
+        form.genre = props.book.genre || '';
+      }
+    });
+
     watch(() => props.errors, (newErrors) => {
-      toast.error(newErrors);
       if (newErrors) {
-        console.log("Errors on mount:", newErrors);
         form.setErrors(newErrors);
         Object.values(newErrors).forEach(error => {
           toast.error(error);
@@ -67,7 +76,6 @@ export default {
     const submitForm = () => {
       form.post(route('books.store'), {
         onError: (error) => {
-          console.log("Errors on submit:", error);
           form.setErrors(error);
           Object.values(error).forEach(err => {
             toast.error(err);
