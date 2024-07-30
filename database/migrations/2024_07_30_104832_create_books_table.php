@@ -9,17 +9,19 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-   public function up()
-{
-    Schema::create('books', function (Blueprint $table) {
-        $table->id();
-        $table->string('title');
-        $table->string('author');
-        $table->year('published_year');
-        $table->string('genre');
-        $table->timestamps();
-    });
-}
+
+
+    public function up()
+    {
+        Schema::create('books', function (Blueprint $table) {
+            $table->id();
+            $table->string('title');
+            $table->string('author');
+            $table->integer('published_year');
+            $table->string('genre');
+            $table->timestamps();
+        });
+    }
 
 
     /**

@@ -8,18 +8,8 @@ use Illuminate\Database\Eloquent\Model;
 class Book extends Model
 {
     use HasFactory;
-    protected $fillable = ['title', 'author', 'published_year', 'genre'];
 
-    public function up()
-{
-    Schema::create('books', function (Blueprint $table) {
-        $table->id();
-        $table->string('title');
-        $table->string('author');
-        $table->year('published_year');
-        $table->string('genre');
-        $table->timestamps();
-    });
-}
-
+    protected $fillable = [
+        'title', 'author', 'published_year', 'genre'
+    ];
 }
