@@ -2,6 +2,8 @@
   <div class="form-container">
     <h1 class="form-title">{{ formTitle }}</h1>
     <div v-if="$page.props.errors && Object.keys($page.props.errors).length" class="alert alert-danger">
+      <!-- <Toast v-if="$page.props.errors && Object.keys($page.props.errors).length"  :time="new Date()" /> -->
+
       <ul>
         <li v-for="(error, key) in $page.props.errors" :key="key">{{ error }}</li>
       </ul>
@@ -37,16 +39,25 @@ import { useForm } from '@inertiajs/inertia-vue3';
 import { watch, onMounted } from 'vue';
 import { useToast } from 'vue-toastification';
 import { usePage } from '@inertiajs/inertia-vue3';
-
+import 'vue-toastification/dist/index.css';
 export default {
     props:{
     book: Object,
     errors: Object
    },
+
+
    setup(props) {
  
     const toast = useToast();
-    
+
+
+// Display toast if there are errors
+    if (props.errors && Object.keys(props.errors).length) {
+      Object.values(props.errors).forEach((error) => {
+        toast.error(error);
+      });
+    }
     const form = useForm({
       title: '',
       author: '',
@@ -55,13 +66,18 @@ export default {
     });
     
     onMounted(() => {
-      console.log({props});
+      console.log({props, val:usePage().props});
       if (props.book) {
         form.title = props.book.title || '';
         form.author = props.book.author || '';
         form.published_year = props.book.published_year || '';
         form.genre = props.book.genre || '';
       }
+      if (props.errors && Object.keys(props.errors).length) {
+      Object.values(props.errors).forEach((error) => {
+        toast.error(error);
+      });
+    }
     });
 
     watch(() => props.errors, (newErrors) => {
@@ -171,5 +187,9 @@ export default {
 
 .submit-button:active {
   background: #ff6347;
+}
+.alert-danger {
+ color: red;
+ 
 }
 </style>
